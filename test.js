@@ -2,24 +2,39 @@ var GeoCalc= require('./distanceCal');
 var db= require('./data');
 var loggerConfiguration = require('./logger');
 const logger = loggerConfiguration.loggerob;
+var tweetScraper = require("./matrix")
 
 var ob =new GeoCalc()
+var scraper = new tweetScraper();
 
-ob.geoCode("odisha")
-.catch((err)=>{
-    console.log(err);
+scraper.flutracer()
+.catch((error)=>{
+    console.log(error);
 })
-.then((data)=>{
+.then((coorList)=>{
 
-    var parsedData= JSON.parse(data);
-    console.log("coordinates of chennai is ", parsedData.results[0].geometry.location) 
-    var coordinates= parsedData.results[0].geometry.location;
-    
-    ob.calcNearest(coordinates,db.data,(dist,loc,add)=>{
-        logger.info(dist,loc,add);
+    ob.geoCode("sipcot chennai")
+    .catch((err)=>{
+        console.log(err);
     })
+    .then((data)=>{
+
+        var parsedData= JSON.parse(data);
+        logger.debug("coordinates of chennai is ", parsedData.results[0].geometry.location) 
+        var coordinates= parsedData.results[0].geometry.location;
     
+        ob.calcNearest(coordinates,coorList,(dist,loc,add)=>{
+        logger.info(dist,loc,add);
+        })
+    
+    })
+
+
 })
+
+
+
+
 
 
 
