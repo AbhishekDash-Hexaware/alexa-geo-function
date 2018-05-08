@@ -9,16 +9,18 @@ class tweetScraper{
         this.limit = 300; 
     }
 
-    flutracer(){
+    flutracer(callback){
         var options={
             url:`http://api.flutrack.org/?time=${this.time}`,
             method:'GET'
         }
-        return new Promise((resolve,reject)=>{
+        
             
             request(options,(error,response,body)=>{
                 if(error){
-                    reject(error)
+                    console.log(error)
+                    callback("error in api call",null);
+                    
                 }else{
             
                     var parseData = JSON.parse(body);
@@ -27,17 +29,30 @@ class tweetScraper{
                     parseData.forEach(element => {
                         locList.push({"lat":element.latitude,"long":element.longitude})
                     });
-                    // console.log(locList)
-                    resolve(locList);   
+                    
+                    if(locList.length === 0){
+                        callback("loc list is empty",null);
+                    }else{
+                        callback(null,locList);
+                    }
+
                 }    
             });
-
-        })
 
     }
 }
 
 var ob = new tweetScraper();
-ob.flutracer();
+
+
+    ob.flutracer((errmsg,data)=>{
+        if(errmsg != null){
+            console.log(errmsg);
+        }
+        else{
+            console.log("data");
+        }
+    });
+    
 
 module.exports= tweetScraper;

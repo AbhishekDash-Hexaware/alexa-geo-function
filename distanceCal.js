@@ -36,15 +36,15 @@ class GeoCalc{
        logger.info("Nearest distance :",min);
        logger.info("Nearest location :",nearestLoc.lat,nearestLoc.long);
        
-       this.revGeoCode(nearestLoc.lat,nearestLoc.long)
-       .catch((error)=>{
-           logger.error(error);
-       })
-       .then((data)=>{
-           var parseData=JSON.parse(data);
-           logger.info(parseData.results[0].formatted_address);
-           callback(min,nearestLoc,parseData.results[0].formatted_address);
-       })
+        this.revGeoCode(nearestLoc.lat,nearestLoc.long,(error,data)=>{
+            if(error){
+                logger.error(error);
+            }else{
+                var parseData=JSON.parse(data);
+                logger.info(parseData.results[0].formatted_address);
+                callback(min,nearestLoc,parseData.results[0].formatted_address);
+            }
+        })
     }
 
     
@@ -65,46 +65,40 @@ class GeoCalc{
     }
 
     
-    revGeoCode(lat,long){
+    revGeoCode(lat,long,callback){
 
         var options={
             url : `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${long}&key=${config.map_key}`,
             method : "GET"
         }
-        return new Promise((resolve,reject)=>{
-
-            request(options,(error,response,body)=>{
-                if(error){
-                    reject(error);
-                }else{
-                    resolve(body);
-                }
-            });
-
+        
+        request(options,(error,response,body)=>{
+            if(error){
+                callback(error,null)
+            }else{
+                callback(null,body);
+            }
         });
         
     }
 
 
-    geoCode(placeName){
+    geoCode(placeName,callback){
 
         logger.debug(placeName);
         var options={
             url : `https://maps.googleapis.com/maps/api/geocode/json?address=${placeName}&key=${config.map_key}`,
             method : "GET"
         }
-        return new Promise((resolve,reject)=>{
 
-            request(options,(error,response,body)=>{
-                if(error){
-                    // logger.error(error);
-                    reject(error);
-                }else{
-                    // logger.debug(body);
-                    resolve(body);
-                }
-            })
+        request(options,(error,response,body)=>{
+            if(error){
+                callback(error,null)
+            }else{
+                callback(null,body);
+            }
         });
+    
         
     }
 
